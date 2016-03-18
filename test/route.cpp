@@ -1,3 +1,9 @@
+/*
+ * route.cpp
+ *
+ *  Created on: 2016-3-17
+ *      Author: zhy
+ */
 
 #include "route.h"
 #include"string.h"
@@ -10,9 +16,21 @@
 #define MaxDemand 50
 //你要完成的功能总入口
 void Mutate(int mutate_num,int demand_num,int best_gene[][ MaxDemand+2])
-{  int temp=0;
-	temp=best_gene[0][mutate_num];best_gene[0][mutate_num]=best_gene[0][demand_num-1-mutate_num];best_gene[0][demand_num-1-mutate_num]=temp;
-	temp=best_gene[1][mutate_num];best_gene[1][mutate_num]=best_gene[1][demand_num-1-mutate_num];best_gene[1][demand_num-1-mutate_num]=temp;
+{  int i,temp=0;
+ for(i=0;i<demand_num/2;i++)
+ {
+	 temp=best_gene[demand_num+i][mutate_num];best_gene[demand_num+i][mutate_num]=best_gene[demand_num+i][demand_num-1-mutate_num];best_gene[demand_num+i][demand_num-1-mutate_num]=temp;
+ }
+}
+void print_path(int s,int e ,int path[][MaxVertex])
+{	int s_temp=0,e_temp=0;
+	e_temp=path[s][e];
+	if(e_temp==e)printf("|");
+	while(e_temp!=e)
+	{
+		printf("|%d|",e_temp);
+		s_temp=e_temp;e_temp=path[s_temp][e];
+	}
 }
 void print_2array(int row, int col, int array[][600])
 {
@@ -80,7 +98,7 @@ void search_route(char *topo[5000], int edge_num, char *demand)
 	{
 		j=0;k=0;
 		flag=true;
-		while((*(topo+i))[j]!='\0')
+		while((*(topo+i))[j+1]!='\r'&&(*(topo+i))[j+1]!='\n'&&(*(topo+i))[j+1]!='\0')
 		{
 			if(flag)
 			{
@@ -99,7 +117,7 @@ void search_route(char *topo[5000], int edge_num, char *demand)
 				flag=true;
 				j++;k++;
 			}
-			if((*(topo+i))[j+1]==10||(*(topo+i))[j+1]=='\0')
+			if((*(topo+i))[j+1]=='\r'||(*(topo+i))[j+1]=='\n'||(*(topo+i))[j+1]=='\0')
 			{
 				topo_array[i][k]=temp;
 				break;
@@ -128,7 +146,7 @@ void search_route(char *topo[5000], int edge_num, char *demand)
 	}
 j=0;k=0;
 flag=true;
-while(demand[j]!='\0')   //读取demand.csv表至demand_col
+while(demand[j]!='\r'&&demand[j]!='\n'&&demand[j]!='\0')   //读取demand.csv表至demand_col
 {
 	if(flag)
 	{
@@ -147,7 +165,7 @@ while(demand[j]!='\0')   //读取demand.csv表至demand_col
 			flag=true;
 			j++;k++;demand_num++;
 	}
-	if(demand[j]==10||demand[j]=='\0')
+	if(demand[j]=='\r'||demand[j]=='\n'||demand[j]=='\0')
 	{
 			demand_col[k]=temp;demand_num++;
 			break;
@@ -211,8 +229,8 @@ while(flag)
 }
 iteration=50*(demand_num-2)/10;
 opt_limit=(demand_num-2)*((demand_num-2)/10);
-//opt_limit=50;
-opt=INF;
+//opt_limit=5;
+//opt=best_gene_cost[0];
 for(i=0;i<iteration;i++)
 {
 	std::fill_n(best_gene_cost, MaxDemand*2, 0);
@@ -244,21 +262,34 @@ for(i=0;i<iteration;i++)
 	}
 	best_gene_cost[0]=best_gene_cost[opt_min1];best_gene_cost[1]=best_gene_cost[opt_min2];
 	opt=opt-best_gene_cost[0];
-	if(opt<=opt_limit)break;
-	for(i=1;i<demand_num-1;i++)		//产生下一个父代1
+	//if(opt<=opt_limit)break;
+	for(j=1;j<demand_num-1;j++)		//产生下一个父代1
 		{
-			best_gene[0][i]=best_gene[opt_min1][i];
+			best_gene[0][j]=best_gene[opt_min1][j];
 		}
-	for(i=1;i<demand_num-1;i++)		//产生下一个父代2
+	for(k=1;k<demand_num-1;k++)		//产生下一个父代2
 		{
-		best_gene[0][i]=best_gene[opt_min2][i];
+		best_gene[0][k]=best_gene[opt_min2][k];
 		}
 	Off_Spring(demand_num,best_gene);
+	Mutate(1,demand_num,best_gene);
 }
-	printf("%d\n",best_gene_cost[0]);
-	print_1array(demand_num,best_gene[0]);
-	//print_2array(vertex_num,vertex_num,cost);
-	//print_2array(vertex_num,vertex_num,path);
+for(i=0;i<demand_num-1;i++)
+{
+	printf("%d",best_gene[0][i]);
+	print_path(best_gene[0][i],best_gene[0][i+1],path);
+	if(i==demand_num-2)
+		{
+		printf("%d\n",best_gene[0][i+1]);
+		}
+}
+	//print_1array(demand_num,path[19]);
+	//printf("%d\n",best_gene_cost[0]);
+	//print_1array(vertex_num,best_gene[0]);
+	//print_1array(demand_num,demand_col);
+	print_2array(vertex_num,vertex_num,cost);
+	printf("\n");
+	print_2array(vertex_num,vertex_num,path);
 	/*
     for(i=0;i<vertex_num;i++)
     	{
@@ -281,5 +312,9 @@ for(i=0;i<iteration;i++)
     for (int i = 0; i < 3; i++)
         record_result(result[i]);
 }
+
+
+
+
 
 
