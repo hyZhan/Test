@@ -54,21 +54,21 @@ void print_1array(int col, int array[])
 	}
 	printf("\n");
 }
-void swap(int low, int high, int array[])
+void swap(int *a, int *b)
 {
 	int temp=0;
-	temp=array[low];array[low]=array[high];array[high]=temp;
+	temp=*a ; *a= *b; *b=temp;
 }
 void revert(int low , int high , int array[] )
 {
 	int i=low ,  j = high ,temp;
-	while(i != j)
+	while(i < j)
 	{
 		temp=array[low];array[low]=array[high];array[high]=temp;
 		i++ ; j--;
 	}
 }
-int Partition (int a[],int perm[] ,int low, int high)
+int Partition (int a[] ,int low, int high)
 {
 	int i = low;
 	int j = high;
@@ -81,8 +81,7 @@ int Partition (int a[],int perm[] ,int low, int high)
 			}
 			if(i<j)
 			{
-				temp=a[i];a[ i ] = a[ j ] ; a[ i ] = temp;
-				temp=perm[ i ] ;perm[ i ] = perm[ j ] ; perm[ j ] = temp;
+				swap(&a[i],&a[j]);
 				i++ ;
 			}
 			while ((a[i] <= a[j]) && (i < j))
@@ -91,20 +90,19 @@ int Partition (int a[],int perm[] ,int low, int high)
 			}
 			if(i<j)
 			{
-				temp=a[i];a[ i ] = a[ j ] ; a[ i ] = temp;
-				temp=perm[ i ] ;perm[ i ] = perm[ j ] ; perm[ j ] = temp;
+				swap(&a[i],&a[j]);
 				j-- ;
 			}
 		}
 		return i ;
 }
-void QuickSort(int r[],int perm[], int first, int end)
+void QuickSort(int r[], int first, int end)
 {
    if (first<end)
   {                                   //递归结束
-       int pivot=Partition(r, perm , first, end);  //一次划分
-       QuickSort(r, perm ,first, pivot-1);//递归地对左侧子序列进行快速排序
-       QuickSort(r, perm ,pivot+1, end);  //递归地对右侧子序列进行快速排序
+       int pivot=Partition(r,  first, end);  //一次划分
+       QuickSort(r ,first, pivot);//递归地对左侧子序列进行快速排序
+       QuickSort(r, pivot+1, end);  //递归地对右侧子序列进行快速排序
  }
 }
 
@@ -137,7 +135,7 @@ void search_route(char *topo[5000], int edge_num, char *demand)
 	int i,j,k, m ,temp,vertex_num=0,demand_num=0,best_gene_num,iteration,opt,opt_limit,opt_min1,opt_min2 , position1 , position2 , position3;
 	//拓扑矩阵topo_array，权值矩阵cost，路径矩阵path，边ID矩阵edge_array，总需求列表demand_col，父代及其子代构成的种群best_gene
 	int topo_array[5000][4]={0},cost[MaxVertex][MaxVertex],path[MaxVertex][MaxVertex]={0},edge_array[MaxVertex][MaxVertex]={0},demand_col[MaxDemand+2]={0},best_gene[MaxDemand*6][MaxDemand+2],best_gene_cost[MaxDemand*6]={0};
-	int temparray [ MaxDemand + 2 ] , randperm [ MaxDemand * 6 ] ;
+	int temparray [ MaxDemand * 6 ] , randperm [ MaxDemand * 6 ] ;
 	bool flag;  //标志位
 	for(i=0;i<MaxVertex;i++)			//cost矩阵初始化
 {
@@ -299,67 +297,61 @@ while(flag)
 	}
 }
 */
-iteration=50*(demand_num-2)/10;
+iteration=500*((demand_num-2)/10);
 opt_limit=(demand_num-2)*((demand_num-2)/10);
 //opt_limit=5;
 //opt=best_gene_cost[0];
-for(i=0;i<iteration;i++)
+for(i=0;i<iteration ;i++)
 {
-	std::fill_n(best_gene_cost, MaxDemand*2, 0);
-	for (m = 0; m < demand_num; m++)
+	std::fill_n(best_gene_cost, MaxDemand * 6, 0);
+
+	printf("%d变异赋值前\n",i );
+	print_1array(demand_num,best_gene[0]);
+	print_1array(demand_num,best_gene[39]);
+	print_1array(demand_num,best_gene[40]);
+	print_1array(demand_num,best_gene[41]);
+
+	for (m = 0; m < best_gene_num; m++)
 	{
-		for( k =0 ; k <  demand_num-2; k++)  temparray [k] = k+2 ;
+		for( k =0 ; k <  demand_num-2; k++)  temparray [k] = k+1 ;
 			for (j = 0; j < 3; j++)
 			{
-						temp = rand() % ( demand_num - 2 );
+						temp =  rand() % ( demand_num - j - 2 )  ;
 						randperm [ j ]=  temparray [ temp ] ;
-						temparray[ temp ] = temparray[ demand_num - 1 - j ] ;
+						temparray[ temp ] = temparray[ demand_num - 3 - j ] ;
 					}
-		 if(randperm [ 0 ]< randperm [ 1 ]){
-			 if(randperm [ 0 ]< randperm [ 2 ]){
-				 position1 = randperm [ 0 ];
-				 if(randperm [ 1 ]< randperm [ 2 ]){
-					 position2 = randperm [ 1 ];  position3 = randperm [ 2 ];
-				 }
-				 else{
-					 position2 = randperm [ 2 ];  position3 = randperm [ 1 ];
-				 }
-			 }
-			 else{
-				 position1 = randperm [ 2 ]; position2 = randperm [ 0 ];  position3 = randperm [ 1 ];
-			 }
-		 }
-		 else{
-			 if(randperm [ 1 ]< randperm [ 2 ]){
-			 				 position1 = randperm [ 1 ];
-			 				 if(randperm [ 0 ]< randperm [ 2 ]){
-			 									 position2 = randperm [ 0 ];  position3 = randperm [ 2 ];
-			 								 }
-			 								 else{
-			 									 position2 = randperm [ 2 ];  position3 = randperm [ 0 ];
-			 								 }
-			 			 }
-			 			 else{
-			 				 position1 = randperm [ 2 ]; position2 = randperm [ 1 ];  position3 = randperm [ 0 ];
-			 			 }
-		 }
-				for( j = 0 ; j < position1-1 ; j++)
+		 QuickSort( randperm , 0 , 2);
+		 position1=randperm[ 0 ] ;  position2=randperm[ 1 ] ;  position3 =randperm[ 2 ] ;
+		 k=0;
+				for( j = 0 ; j < position1 ; j++)
 				{
-					best_gene[ m +demand_num][ j ] = best_gene[ m ][ j ];
+					best_gene[ m +best_gene_num][ k ] = best_gene[ m ][ j ];
+					k++;
 				}
-				for( j = position2 +1  ; j < position3 ; j++)
+				for( j = position2 + 1  ; j < position3 + 1 ; j++)
 				{
-				best_gene[ m +demand_num][ j ] = best_gene[ m ][ j ];
+				best_gene[ m +best_gene_num][ k ] = best_gene[ m ][ j ];
+				k++;
 				}
-				for( j = position1  ; j < position2 ; j++)
+				for( j = position1 ; j < position2 + 1 ; j++)
 				{
-				best_gene[ m +demand_num][ j ] = best_gene[ m ][ j ];
+				best_gene[ m +best_gene_num][ k ] = best_gene[ m ][ j ];
+				k++;
 				}
-				for( j = position3 + 1  ; j < demand_num ; j++)
+				for( j = position3  + 1 ; j < demand_num ; j++)
 				{
-				best_gene[ m +demand_num][ j ] = best_gene[ m ][ j ];
+				best_gene[ m +best_gene_num][ k ] = best_gene[ m ][ j ];
+				k++;
 				}
 	}
+
+	printf("%d变异后\n",i );
+	print_1array(demand_num,best_gene[0]);
+	print_1array(demand_num,best_gene[38]);
+	print_1array(demand_num,best_gene[39]);
+	print_1array(demand_num,best_gene[40]);
+	print_1array(demand_num,best_gene[41]);
+
 	for(j=0;j<best_gene_num*2;j++)
 	{
 		for(k=0;k<demand_num-1;k++)
@@ -367,24 +359,47 @@ for(i=0;i<iteration;i++)
 			best_gene_cost[j]+=cost[best_gene[j][k]][best_gene[j][k+1]];
 		}
 	}
-	for( k =0 ; k <  best_gene_num * 2; k++)  randperm [k] = k ;
-	QuickSort(best_gene_cost , randperm , 0 , best_gene_num*2 );
+	for( k =0 ; k <  best_gene_num * 2; k++)  temparray [k] =best_gene_cost[ k ] ;
+	//print_1array(demand_num,best_gene[0]);
+	QuickSort(best_gene_cost , 0 , best_gene_num*2 - 1);
 	opt=best_gene_cost [ best_gene_num*2 -1] - best_gene_cost [ 0 ];
-	QuickSort( randperm ,  best_gene_cost,  0 , best_gene_num );
+	for( k =0 ; k <  best_gene_num; k++) {
+		for( j = 0 ; j < best_gene_num*2 ; j++){
+			if( best_gene_cost[ k ] == temparray[ j ]){
+				randperm[ k ] = j ;
+			}
+		}
+	}
+	/*
+	printf("%d排序后\n",i );
+	print_1array(demand_num,best_gene[0]);
+	print_1array(demand_num,best_gene[ 40 ]);
+	*/
 	for(j=0;j<best_gene_num;j++)
 		{
-			for(k=0;k<demand_num-1;k++)
+			for(k=0;k<demand_num;k++)
 			{
 				best_gene[ j + best_gene_num*2 ][ k ] =best_gene[ randperm[ j ]  ][ k ] ;
 			}
 		}
+	/*
+	printf("%d赋值40-59后\n",i );
+	print_1array(demand_num,best_gene[0]);
+	print_1array(demand_num,best_gene[ 40 ]);
+	*/
 	for(j=0;j<best_gene_num;j++)
 			{
-				for(k=0;k<demand_num-1;k++)
+				for(k=0;k<demand_num;k++)
 				{
 					best_gene[ j  ][ k ] =best_gene[ j + best_gene_num*2  ][ k ] ;
 				}
 			}
+	/*
+	printf("%d赋值0-19后\n",i );
+	print_1array(demand_num,best_gene[0]);
+	print_1array(demand_num,best_gene[ 40 ]);
+	printf("\n");
+	*/
 	//if(opt<=opt_limit)break;
 }
 for(i=0;i<demand_num-1;i++)
@@ -397,7 +412,7 @@ for(i=0;i<demand_num-1;i++)
 		}
 }
 	//print_1array(demand_num,path[19]);
-	//printf("%d\n",best_gene_cost[0]);
+	printf("%d\n",best_gene_cost[0]);
 	//print_1array(demand_num,best_gene[0]);
 	//print_1array(demand_num,demand_col);
 	//print_2array(vertex_num,vertex_num,cost);
