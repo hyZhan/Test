@@ -15,6 +15,37 @@
 #define MaxVertex 600
 #define MaxDemand 50
 //你要完成的功能总入口
+void quicksort(int a[],int perm[] ,int low, int high)
+{
+	int i = low;
+	int j = high;
+	int temp = a[i];
+	int perm_temp = i;
+	if (low < high)
+	{
+		while (i < j)
+		{
+			while ((a[j] >= temp) && (i < j))
+			{
+				j--;
+			}
+			a[i] = a[j];
+			perm[i] = perm[j];
+			while ((a[i] <= temp) && (i < j))
+			{
+				i++;
+			}
+			a[j] = a[i]; perm[j] = perm[i];
+		}
+		a[i] = temp; perm[i] = perm_temp;
+		quicksort(a, perm,low, i - 1);
+		quicksort(a, perm,j + 1, high);
+	}
+	else
+	{
+		return;
+	}
+}
 void Mutate(int mutate_num,int demand_num,int best_gene[][ MaxDemand+2])
 {  int i,temp=0;
  for(i=0;i<demand_num/2;i++)
@@ -88,6 +119,7 @@ void search_route(char *topo[5000], int edge_num, char *demand)
 	int i,j,k,temp,vertex_num=0,demand_num=0,best_gene_num,iteration,opt,opt_limit,opt_min1,opt_min2; //暫存变量i,j,k,m,temp,顶点数vertex_num，总需求列表长度demand_num，种群大小best_gene_num,迭代数iteration,优化值opt,优化阈值opt_limit
 	//拓扑矩阵topo_array，权值矩阵cost，路径矩阵path，边ID矩阵edge_array，总需求列表demand_col，父代及其子代构成的种群best_gene
 	int topo_array[5000][4]={0},cost[MaxVertex][MaxVertex],path[MaxVertex][MaxVertex]={0},edge_array[MaxVertex][MaxVertex]={0},demand_col[MaxDemand+2]={0},best_gene[MaxDemand*2][MaxDemand+2],best_gene_cost[MaxDemand*2]={0};
+	int temparray [ MaxDemand + 2 ] , randperm [ MaxDemand + 2 ] ;
 	bool flag;  //标志位
 	for(i=0;i<MaxVertex;i++)			//cost矩阵初始化
 {
@@ -202,7 +234,13 @@ else
 	 best_gene[1][0]=demand_col[0];best_gene[1][demand_num-1]=demand_col[1];
  }
 }
-Off_Spring(demand_num,best_gene);
+for( i = 1 ; i < best_gene_num ; i++ )
+{
+	for( j =0 ; j <  demand_num ; j++)  temparray [j] = rand();
+	for( j =0 ; j <  demand_num ; j++)  randperm [j] = j ;
+	quicksort ( temparray , randperm , 0 , demand_num - 1 );
+	print_1array(demand_num,randperm);
+}
 flag=true;
 while(flag)
 {
@@ -285,29 +323,11 @@ for(i=0;i<demand_num-1;i++)
 }
 	//print_1array(demand_num,path[19]);
 	//printf("%d\n",best_gene_cost[0]);
-	//print_1array(vertex_num,best_gene[0]);
+	//print_1array(demand_num,best_gene[0]);
 	//print_1array(demand_num,demand_col);
-	print_2array(vertex_num,vertex_num,cost);
+	//print_2array(vertex_num,vertex_num,cost);
 	printf("\n");
-	print_2array(vertex_num,vertex_num,path);
-	/*
-    for(i=0;i<vertex_num;i++)
-    	{
-    		for(j=0;j<vertex_num;j++)
-    				{
-    					printf ("%d ",cost[i][j]);
-    				}
-    		printf("\n");
-    	}
-    for(i=0;i<vertex_num;i++)
-    	{
-    		for(j=0;j<vertex_num;j++)
-    				{
-    					printf ("%d ",path[i][j]);
-    				}
-    		printf("\n");
-    	}
-    	*/
+	//print_2array(vertex_num,vertex_num,path);
 	unsigned short result[] = {2, 6, 3};//示例中的一个解
     for (int i = 0; i < 3; i++)
         record_result(result[i]);
